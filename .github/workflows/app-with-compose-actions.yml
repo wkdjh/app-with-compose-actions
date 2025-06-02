@@ -1,7 +1,7 @@
-name: App With Github Actions with Docker CI/CD
+name: App With Github Actions with docker-compose CI/CD
 
 on:
-  workflow_dispatch
+  push
 
 jobs:
   ci:
@@ -15,9 +15,15 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-        
+    - name: Make application-prod.properties
+      run: |
+        cd ./src/main/resources
+        touch ./application.properties
+        echo "${{ secrets.PROPERTIES }}" > ./application.properties
+      shell: bash
+          
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B package -DskipTests --file pom.xml
       
     - name: Naming jar file
       run: mv ./target/*.jar ./target/app.jar
@@ -48,21 +54,19 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/app-with-actions:latest
-
   cd:
     needs: ci
     runs-on: ubuntu-latest
     steps:
     - name: Execute deployment script
-      uses: appleboy/ssh-action@v1
+      uses: appleboy/ssh-action@v1.2.0
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_PRIVATE_KEY }}
         script: |
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/app-with-actions
-          sudo docker stop $(sudo docker ps -qa)
-          sudo docker rm $(sudo docker ps -qa)
-          sudo docker run -d -p 8080:8080 \
-          -e TZ=Asia/Seoul \
-          ${{ secrets.DOCKERHUB_USERNAME }}/app-with-actions
+            cd
+            sudo docker-compose down
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/app-with-actions
+            sudo docker-compose up -d
+            sudo docker image prune -a -f
