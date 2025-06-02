@@ -11,4 +11,9 @@ public class ActionsController {
 		return "app-with-actions version:0.0.3";
 	}
 	
+	
+	@GetMapping("/db-test")
+	public String dbTest() {
+		return "DB 연결 성공!";
+	}
 }
