@@ -86,7 +86,7 @@ jobs:
         IMAGE_TAG: latest
       run: |
         aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin private.ecr.aws/${{ secrets.ECR_ID }}
-        docker pull $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG
+        docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
     
     
     
