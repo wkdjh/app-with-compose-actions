@@ -1,6 +1,6 @@
 name: Build and Push Docker Image To AWS ECR
 on:
-  push:
+  workflow_dispatch:
     branches:
       - main
 
@@ -62,20 +62,5 @@ jobs:
       - name: Push Docker image to Amazon ECR
         run: |
           docker push ${{ secrets.AWS_ECR_PRIVATE_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.AWS_ECR_PRIVATE_REPOSITORY }}:${{ github.sha }}
-  cd:
-    needs: build-push-image
-    runs-on: ubuntu-latest
-    steps:
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          script: |
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_PRIVATE_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-            docker pull ${{ secrets.AWS_ECR_PRIVATE_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.AWS_ECR_PRIVATE_REPOSITORY }}:latest
-            
-
-
+ 
     
