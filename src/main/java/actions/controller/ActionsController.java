@@ -5,6 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ActionsController {
+
+	@GetMapping(value = "/")
+	public String Test() {
+		return "basic-test";
+	}
 	
 	@GetMapping(value = "/api/actions")
 	public String actionsTest() {
